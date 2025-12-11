@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+httpx
+sqlalchemy>=2.0.0
+aiosqlite
+pydantic>=2.0.0
+pydantic-settings
+nats-py
+python-dotenv
+greenlet
+

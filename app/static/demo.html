@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WS/NATS Demo</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 16px; background: #f7f7f7; }
+    header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    button { padding: 8px 12px; }
+    #status { font-weight: bold; }
+    .log { background: #fff; border: 1px solid #ddd; padding: 12px; height: 320px; overflow-y: auto; }
+    .row { margin-bottom: 6px; font-family: monospace; white-space: pre-wrap; }
+    .ws { color: #1d72b8; }
+    .nats { color: #0b874b; }
+  </style>
+</head>
+<body>
+  <header>
+    <h2>WebSocket & NATS Monitor</h2>
+    <div id="status">disconnected</div>
+    <button id="connect">Connect</button>
+    <button id="disconnect" disabled>Disconnect</button>
+  </header>
+
+  <section>
+    <h3>Incoming messages</h3>
+    <div class="log" id="log"></div>
+  </section>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const logEl = document.getElementById('log');
+    const btnConnect = document.getElementById('connect');
+    const btnDisconnect = document.getElementById('disconnect');
+
+    let ws = null;
+
+    function log(kind, message) {
+      const row = document.createElement('div');
+      row.className = `row ${kind}`;
+      row.textContent = `[${new Date().toISOString()}] ${message}`;
+      logEl.appendChild(row);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function connect() {
+      const url = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws/items';
+      ws = new WebSocket(url);
+      statusEl.textContent = 'connecting...';
+
+      ws.onopen = () => {
+        statusEl.textContent = 'connected';
+        btnConnect.disabled = true;
+        btnDisconnect.disabled = false;
+        log('ws', 'WebSocket connected to ' + url);
+      };
+
+      ws.onmessage = (event) => {
+        log('ws', event.data);
+        try {
+          const data = JSON.parse(event.data);
+          if (data.event === 'nats_message') {
+            log('nats', 'NATS: ' + JSON.stringify(data.data));
+          }
+        } catch (err) {
+          // ignore parse errors
+        }
+      };
+
+      ws.onclose = () => {
+        statusEl.textContent = 'disconnected';
+        btnConnect.disabled = false;
+        btnDisconnect.disabled = true;
+        log('ws', 'WebSocket disconnected');
+      };
+
+      ws.onerror = (err) => {
+        log('ws', 'Error: ' + err.message);
+      };
+    }
+
+    function disconnect() {
+      if (ws) {
+        ws.close();
+        ws = null;
+      }
+    }
+
+    btnConnect.addEventListener('click', connect);
+    btnDisconnect.addEventListener('click', disconnect);
+  </script>
+</body>
+</html>
+
