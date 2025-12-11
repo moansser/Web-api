@@ -1,4 +1,4 @@
-# TODO API - FastAPI Backend
+# TODO API - FastAPI
 
 Полноценный серверный backend на FastAPI с REST API, WebSocket и фоновыми задачами.
 
@@ -37,12 +37,6 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-Или через Python:
-
-```bash
-python main.py
-```
-
 Приложение будет доступно по адресу: `http://localhost:8000`
 
 ### 3. Документация API
@@ -51,66 +45,6 @@ python main.py
 
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
-
-## Использование
-
-### REST API примеры
-
-#### Создать задачу
-
-```bash
-curl -X POST "http://localhost:8000/tasks" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "Новая задача",
-    "description": "Описание задачи",
-    "completed": false
-  }'
-```
-
-#### Получить все задачи
-
-```bash
-curl "http://localhost:8000/tasks"
-```
-
-#### Обновить задачу
-
-```bash
-curl -X PATCH "http://localhost:8000/tasks/1" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "completed": true
-  }'
-```
-
-#### Удалить задачу
-
-```bash
-curl -X DELETE "http://localhost:8000/tasks/1"
-```
-
-### WebSocket пример
-
-```javascript
-const ws = new WebSocket('ws://localhost:8000/ws/tasks');
-
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  console.log('Received:', data);
-};
-
-ws.onopen = () => {
-  console.log('Connected to WebSocket');
-  ws.send(JSON.stringify({ type: 'ping' }));
-};
-```
-
-### Принудительный запуск фоновой задачи
-
-```bash
-curl -X POST "http://localhost:8000/task-generator/run"
-```
 
 ## Структура проекта
 
@@ -128,15 +62,6 @@ Web-api/
 ├── requirements.txt        # Зависимости
 └── README.md              # Документация
 ```
-
-## Технологии
-
-- **FastAPI** - современный веб-фреймворк для Python
-- **SQLAlchemy** - ORM для работы с базой данных
-- **aiosqlite** - асинхронный драйвер для SQLite
-- **httpx** - асинхронный HTTP клиент
-- **Pydantic** - валидация данных
-- **WebSocket** - двусторонняя связь в реальном времени
 
 ## База данных
 
