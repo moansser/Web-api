@@ -59,7 +59,7 @@ uvicorn app.main:app --reload
 
 Подключение к `ws://localhost:8000/ws/items`.
 
-image.png
+<img width="1470" height="504" alt="image" src="https://github.com/user-attachments/assets/e3e9b719-3788-4809-85d2-c882bb9bb2a3" />
 
 ## Ссылка на отчет
 
