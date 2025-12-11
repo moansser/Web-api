@@ -11,9 +11,59 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+## Документация по API
+
+    Swagger UI: http://localhost:8000/docs
+    WebSocket: ws://localhost:8000/ws/items
+    Демостраница WS/NATS: http://localhost:8000/demo
+
+## Пример работы NATS (publisher + subscriber)
+
+1. Поднять NATS локально (по умолчанию `nats://localhost:4222`).
+2. Запустить приложение (`uvicorn app.main:app --reload`).
+3. Подписчик (python пример):
+   ```python
+   import asyncio, json
+   from nats.aio.client import Client as NATS
+
+   async def main():
+       nc = NATS()
+       await nc.connect("nats://localhost:4222")
+
+       async def handler(msg):
+           print("Received:", msg.subject, msg.data.decode())
+
+       await nc.subscribe("prices.updates", cb=handler)
+       print("listening on prices.updates")
+       # удерживаем соединение
+       await asyncio.Future()
+
+   asyncio.run(main())
+   ```
+4. Паблишер: любые события приложения (POST/PATCH/DELETE /items или фоновая задача) публикуют JSON в `prices.updates`. Можно отправить вручную:
+   ```python
+   import asyncio, json
+   from nats.aio.client import Client as NATS
+
+   async def main():
+       nc = NATS()
+       await nc.connect("nats://localhost:4222")
+       await nc.publish("prices.updates", json.dumps({"event": "test", "payload": 123}).encode())
+       await nc.flush()
+       await nc.close()
+
+   asyncio.run(main())
+   ```
+    
 ## WebSocket
 
 Подключение к `ws://localhost:8000/ws/items`.
+
+image.png
+
+## Ссылка на отчет
+
+    https://docs.google.com/document/d/12QlTbPk2d2ZfzzodWipMCT-0jsTmILR1Ui5KTKc__W4/edit?usp=sharing
 
 ## Структура
 
