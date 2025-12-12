@@ -63,7 +63,7 @@ uvicorn app.main:app --reload
 
 ## Ссылка на отчет
 
-    https://docs.google.com/document/d/12QlTbPk2d2ZfzzodWipMCT-0jsTmILR1Ui5KTKc__W4/edit?usp=sharing
+    https://docs.google.com/document/d/16-G4UIoExsIhV06FjdfsOCHOiPqjCqls/edit?usp=sharing&ouid=111681029320580157118&rtpof=true&sd=true
 
 ## Структура
 
