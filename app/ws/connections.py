@@ -23,7 +23,6 @@ class ConnectionManager:
             try:
                 await connection.send_json(message)
             except Exception:
-                # Drop failed connections silently for demo purposes
                 await self.disconnect(connection)
 
 
