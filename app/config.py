@@ -6,7 +6,6 @@ class Settings(BaseSettings):
 
     NATS_URL: str = "nats://localhost:4222"
     DATABASE_URL: str = "sqlite+aiosqlite:///./app.db"
-    EXTERNAL_API_URL: str = "https://example.com/prices"
     FETCH_INTERVAL_SECONDS: int = 30
 
     class Config:
@@ -17,4 +16,3 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
-
