@@ -1,79 +1,149 @@
-# FastAPI Prices Demo
+# FastAPI Prices Service
 
-Итоговое задание: сервис котировок золота (XAU), серебра (XAG) и нефти (BRENT) с REST API, WebSocket-уведомлениями, фоновой загрузкой данных и публикацией событий в NATS.
+Сервис для получения и отслеживания реальных цен на золото (XAU), серебро (XAG) и нефть Brent (BRENT) с использованием REST API, WebSocket-уведомлений, фоновой загрузки данных и публикацией событий в NATS.
 
-## Запуск
+## Возможности
 
+- Получение реальных цен из Yahoo Finance API
+- REST API для доступа к данным
+- WebSocket для real-time уведомлений
+- Фоновая задача автоматического обновления цен
+- Публикация событий в NATS
+- SQLite база данных для хранения истории цен
+
+
+## Инструкция по запуску
+
+### 1. Создание виртуального окружения
 ```bash
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+```
+### 2. Активация виртуального окружения
+**macOS/Linux:**
+```bash
+source venv/bin/activate
+```
+**Windows:**
+```bash
+venv\Scripts\activate
 ```
 
-## Документация по API
+### 3. Установка зависимостей
+```bash
+pip install -r requirements.txt
+```
 
-    Swagger UI: http://localhost:8000/docs
-    WebSocket: ws://localhost:8000/ws/items
-    Демостраница WS/NATS: http://localhost:8000/demo
+### 4. Запуск NATS сервера
+Откройте новый терминал и запустите NATS сервер:
+```bash
+nats-server
+```
+NATS сервер будет доступен по адресу `nats://localhost:4222` (по умолчанию).
+**Примечание:** Если порт 4222 занят, можно найти и остановить процесс:
+```bash
+lsof -i :4222
+kill <PID>
+```
 
-## Пример работы NATS (publisher + subscriber)
+### 5. Запуск приложения
+В терминале с активированным виртуальным окружением:
+```bash
+uvicorn app.main:app --reload
+```
+Приложение будет доступно по адресу `http://localhost:8000`
 
-1. Поднять NATS локально (по умолчанию `nats://localhost:4222`).
-2. Запустить приложение (`uvicorn app.main:app --reload`).
-3. Подписчик (python пример):
-   ```python
-   import asyncio, json
-   from nats.aio.client import Client as NATS
+### 6. Проверка работы
+- Откройте браузер и перейдите на `http://localhost:8000/docs` для просмотра Swagger UI
+- Или откройте `http://localhost:8000/demo` для демонстрации WebSocket и NATS
 
-   async def main():
-       nc = NATS()
-       await nc.connect("nats://localhost:4222")
+## API Документация
 
-       async def handler(msg):
-           print("Received:", msg.subject, msg.data.decode())
+После запуска приложения доступны следующие эндпоинты:
+- **Swagger UI:** http://localhost:8000/docs
+- **ReDoc:** http://localhost:8000/redoc
+- **WebSocket:** ws://localhost:8000/ws/items
+- **Демо страница:** http://localhost:8000/demo
 
-       await nc.subscribe("prices.updates", cb=handler)
-       print("listening on prices.updates")
-       # удерживаем соединение
-       await asyncio.Future()
+### Основные эндпоинты
+- `GET /items/` - Получить список всех цен
+- `GET /items/?symbol=XAU` - Получить цены по символу
+- `GET /items/{item_id}` - Получить цену по ID
+- `POST /tasks/run` - Запустить задачу получения цен вручную
 
-   asyncio.run(main())
-   ```
-4. Паблишер: любые события приложения (POST/PATCH/DELETE /items или фоновая задача) публикуют JSON в `prices.updates`. Можно отправить вручную:
-   ```python
-   import asyncio, json
-   from nats.aio.client import Client as NATS
+## Использование NATS
 
-   async def main():
-       nc = NATS()
-       await nc.connect("nats://localhost:4222")
-       await nc.publish("prices.updates", json.dumps({"event": "test", "payload": 123}).encode())
-       await nc.flush()
-       await nc.close()
+### Подписка на события
+Пример подписчика на события цен:
+```python
+import asyncio
+import json
+from nats.aio.client import Client as NATS
 
-   asyncio.run(main())
-   ```
-    
+async def main():
+    nc = NATS()
+    await nc.connect("nats://localhost:4222")
+
+    async def handler(msg):
+        data = json.loads(msg.data.decode())
+        print(f"Received: {msg.subject}")
+        print(f"Data: {data}")
+
+    await nc.subscribe("prices.updates", cb=handler)
+    print("Listening on prices.updates...")
+    await asyncio.Future()
+
+asyncio.run(main())
+```
+
+### Публикация событий
+Приложение автоматически публикует события при обновлении цен. Также можно публиковать вручную:
+```python
+import asyncio
+import json
+from nats.aio.client import Client as NATS
+
+async def main():
+    nc = NATS()
+    await nc.connect("nats://localhost:4222")
+    await nc.publish(
+        "prices.updates",
+        json.dumps({"event": "test", "items": []}).encode()
+    )
+    await nc.flush()
+    await nc.close()
+
+asyncio.run(main())
+```
+
 ## WebSocket
 
-Подключение к `ws://localhost:8000/ws/items`.
+Для подключения к WebSocket используйте:
+```javascript
+const ws = new WebSocket('ws://localhost:8000/ws/items');
 
-<img width="1470" height="504" alt="image" src="https://github.com/user-attachments/assets/e3e9b719-3788-4809-85d2-c882bb9bb2a3" />
+ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    console.log('Received:', data);
+};
+```
 
-## Ссылка на отчет
+## Структура проекта
 
-    https://docs.google.com/document/d/16-G4UIoExsIhV06FjdfsOCHOiPqjCqls/edit?usp=sharing&ouid=111681029320580157118&rtpof=true&sd=true
-
-## Структура
-
-- `app/api` — REST эндпоинты
-- `app/ws` — менеджер WebSocket-подключений
-- `app/services` — бизнес-логика и работа с БД
-- `app/tasks` — фоновые задачи парсинга
-- `app/db` — настройки БД
-- `app/models` — SQLAlchemy модели
-- `app/nats` — клиент NATS
-- `app/schemas` — Pydantic-схемы
-- `app/config.py` — настройки приложения
-
+```
+Web-api-proj/
+├── app/
+│   ├── api/           # REST API эндпоинты
+│   ├── config.py      # Настройки приложения
+│   ├── db/            # Настройки базы данных
+│   ├── main.py        # Точка входа приложения
+│   ├── models/        # SQLAlchemy модели
+│   ├── nats/          # NATS клиент
+│   ├── schemas/       # Pydantic схемы
+│   ├── services/      # Бизнес-логика
+│   ├── static/        # Статические файлы
+│   ├── tasks/         # Фоновые задачи
+│   └── ws/            # WebSocket менеджер
+├── app.db             # SQLite база данных (создается автоматически)
+├── requirements.txt   # Зависимости Python
+└── README.md          # Документация
+```
