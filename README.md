@@ -2,6 +2,9 @@
 
 Сервис для получения и отслеживания реальных цен на золото (XAU), серебро (XAG) и нефть Brent (BRENT) с использованием REST API, WebSocket-уведомлений, фоновой загрузки данных и публикацией событий в NATS.
 
+# Ссылка на отчет
+https://docs.google.com/document/d/16-G4UIoExsIhV06FjdfsOCHOiPqjCqls/edit?usp=sharing&ouid=111681029320580157118&rtpof=true&sd=true
+
 ## Возможности
 
 - Получение реальных цен из Yahoo Finance API
