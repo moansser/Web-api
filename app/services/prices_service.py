@@ -34,16 +34,6 @@ class PricesService:
         )
         return result.scalar_one_or_none()
 
-    async def list_prices(
-        self, symbol: Optional[str] = None
-    ) -> List[MetalPrice]:
-        stmt = select(MetalPrice)
-        if symbol:
-            stmt = stmt.where(MetalPrice.symbol == symbol)
-        stmt = stmt.order_by(MetalPrice.fetched_at.desc())
-        result = await self.session.execute(stmt)
-        return list(result.scalars().all())
-
     async def list_latest_by_symbol(
         self, symbol: Optional[str] = None
     ) -> List[MetalPrice]:

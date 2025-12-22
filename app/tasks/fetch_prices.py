@@ -46,18 +46,7 @@ async def _fetch_external_prices() -> Dict[str, float]:
                         previous_close = meta.get("previousClose")
                         
                         price = regular_market_price or previous_close
-                        
-                        if price and price > 0:
-                            prices[symbol_key] = round(float(price), 2)
-                        else:
-                            indicators = result[0].get("indicators", {})
-                            quote = indicators.get("quote", [])
-                            if quote and len(quote) > 0:
-                                close_prices = quote[0].get("close", [])
-                                if close_prices:
-                                    last_price = [p for p in close_prices if p is not None]
-                                    if last_price:
-                                        prices[symbol_key] = round(float(last_price[-1]), 2)
+                        prices[symbol_key] = round(float(price), 2)
                 
                 if symbol_key not in prices:
                     raise ValueError(f"Не удалось получить цену для {symbol_key}")
@@ -89,7 +78,7 @@ async def fetch_prices_once() -> List[dict[str, Any]]:
 
     items = [PriceRead.from_orm(p).dict() for p in stored]
     message = jsonable_encoder({"event": "fetched", "items": items})
-    await manager.broadcast(message)
+    #await manager.broadcast(message)
     await publish("prices.updates", message)
     return items
 

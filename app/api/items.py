@@ -40,7 +40,7 @@ async def create_item(
     item = await service.create_price(payload)
     data = PriceRead.from_orm(item).dict()
     message = jsonable_encoder({"event": "created", "item": data})
-    await manager.broadcast(message)
+    #await manager.broadcast(message)
     await publish("prices.updates", message)
     return data
 
@@ -55,7 +55,7 @@ async def update_item(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
     data = PriceRead.from_orm(item).dict()
     message = jsonable_encoder({"event": "updated", "item": data})
-    await manager.broadcast(message)
+    #await manager.broadcast(message)
     await publish("prices.updates", message)
     return data
 
@@ -67,7 +67,7 @@ async def delete_item(item_id: int, session: AsyncSession = Depends(get_session)
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Item not found")
     message = jsonable_encoder({"event": "deleted", "id": item_id})
-    await manager.broadcast(message)
+    #await manager.broadcast(message)
     await publish("prices.updates", message)
     return None
 

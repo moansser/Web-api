@@ -59,7 +59,6 @@ async def shutdown_event() -> None:
 
 @app.get("/demo", response_class=HTMLResponse, include_in_schema=False)
 async def demo_page():
-    """Simple HTML page to observe WebSocket and NATS messages."""
     return FileResponse(BASE_DIR / "static" / "demo.html")
 
 
